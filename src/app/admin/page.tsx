@@ -100,27 +100,30 @@ const AdminPage = () => {
   }
 
   return (
-    <div className="min-h-screen cyber-grid relative overflow-hidden">
-      {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-float"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-cyan-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-float" style={{ animationDelay: '2s' }}></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-pink-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-float" style={{ animationDelay: '4s' }}></div>
-      </div>
-
-      {/* Navigation */}
-      <nav className="relative z-10 glass border-b border-white/10">
+    <div className="min-h-screen bg-black text-terminal-green font-mono relative">
+      {/* Matrix background effect */}
+      <div className="matrix-bg"></div>
+      
+      {/* Terminal Header */}
+      <nav className="relative z-10 border-b border-terminal-green/30 bg-terminal-bg-alt/80 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center">
-              <h1 className="text-2xl font-bold text-gradient neon-text">Admin Dashboard</h1>
+              <pre className="text-terminal-red text-sm hidden sm:block">
+{`╔═══════════════════╗
+║  ADMIN TERMINAL   ║
+╚═══════════════════╝`}
+              </pre>
+              <span className="text-terminal-red terminal-text-bright text-xl font-bold sm:hidden">
+                ADMIN_TERMINAL
+              </span>
             </div>
-            <div className="flex items-center space-x-4">
-              <Link href="/" className="px-4 py-2 glass text-white rounded-lg hover:bg-white/10 transition-colors">
-                ← Back to Platform
+            <div className="flex items-center space-x-4 text-sm">
+              <Link href="/" className="terminal-button px-3 py-1">
+                [← MAIN]
               </Link>
-              <Link href="/leaderboard" className="px-4 py-2 bg-gradient-secondary text-white rounded-lg hover:opacity-90 transition-opacity">
-                Leaderboard
+              <Link href="/leaderboard" className="terminal-button px-3 py-1">
+                [SCORES]
               </Link>
             </div>
           </div>
@@ -128,37 +131,39 @@ const AdminPage = () => {
       </nav>
 
       {/* Main Content */}
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <div className="text-center mb-12">
-          <h2 className="text-5xl font-bold mb-4">
-            <span className="text-gradient">Control Center</span>
-          </h2>
-          <p className="text-xl text-gray-400">Manage challenges and users</p>
+        <div className="text-center mb-8 terminal-fade-in">
+          <pre className="text-terminal-red text-xs sm:text-sm inline-block">
+{`================================================================================
+                         ADMINISTRATIVE CONTROL PANEL
+                            ROOT ACCESS GRANTED
+================================================================================`}
+          </pre>
         </div>
 
         {/* Tabs */}
         <div className="flex justify-center mb-8">
-          <div className="glass rounded-lg p-1 inline-flex">
+          <div className="terminal-border inline-flex p-1">
             <button
               onClick={() => setActiveTab('challenges')}
-              className={`px-6 py-2 rounded-lg font-medium transition-all ${
+              className={`px-4 py-2 text-sm font-bold transition-all ${
                 activeTab === 'challenges'
-                  ? 'bg-gradient-primary text-white'
-                  : 'text-gray-400 hover:text-white'
+                  ? 'bg-terminal-green text-terminal-bg'
+                  : 'text-terminal-green-muted hover:text-terminal-green'
               }`}
             >
-              Challenges
+              [CHALLENGES]
             </button>
             <button
               onClick={() => setActiveTab('users')}
-              className={`px-6 py-2 rounded-lg font-medium transition-all ${
+              className={`px-4 py-2 text-sm font-bold transition-all ${
                 activeTab === 'users'
-                  ? 'bg-gradient-primary text-white'
-                  : 'text-gray-400 hover:text-white'
+                  ? 'bg-terminal-green text-terminal-bg'
+                  : 'text-terminal-green-muted hover:text-terminal-green'
               }`}
             >
-              Users
+              [USERS]
             </button>
           </div>
         </div>
@@ -170,55 +175,56 @@ const AdminPage = () => {
             <div className="mb-6 flex justify-end">
               <button
                 onClick={() => setIsCreating(true)}
-                className="px-6 py-3 bg-gradient-primary text-white rounded-lg hover:opacity-90 transition-all flex items-center gap-2"
+                className="terminal-button-primary px-4 py-2 text-sm font-bold"
               >
-                <span className="text-xl">➕</span>
-                Create Challenge
+                [+ NEW_CHALLENGE]
               </button>
             </div>
 
             {/* Create Challenge Form */}
             {isCreating && (
-              <div className="glass rounded-xl p-6 mb-6 border-gradient">
-                <h3 className="text-xl font-bold text-white mb-4">New Challenge</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="terminal-card p-6">
+                <div className="text-terminal-green font-bold mb-4">
+                  <span className="terminal-prompt">create_challenge --interactive</span>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl">
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">Title</label>
+                    <label className="block text-terminal-green-muted text-sm mb-2">TITLE:</label>
                     <input
                       type="text"
                       value={newChallenge.title}
                       onChange={(e) => setNewChallenge({ ...newChallenge, title: e.target.value })}
-                      className="w-full px-4 py-2 glass rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      className="w-full terminal-input text-sm"
                       placeholder="Challenge title"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">Points</label>
+                    <label className="block text-terminal-green-muted text-sm mb-2">POINTS:</label>
                     <input
                       type="number"
                       value={newChallenge.points}
                       onChange={(e) => setNewChallenge({ ...newChallenge, points: parseInt(e.target.value) })}
-                      className="w-full px-4 py-2 glass rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      className="w-full terminal-input text-sm"
                       placeholder="100"
                     />
                   </div>
                   <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-300 mb-2">Description</label>
+                    <label className="block text-terminal-green-muted text-sm mb-2">DESCRIPTION:</label>
                     <textarea
                       value={newChallenge.description}
                       onChange={(e) => setNewChallenge({ ...newChallenge, description: e.target.value })}
-                      className="w-full px-4 py-2 glass rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      className="w-full terminal-input text-sm resize-none"
                       rows={3}
                       placeholder="Challenge description"
                     />
                   </div>
                   <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-300 mb-2">Flag</label>
+                    <label className="block text-terminal-green-muted text-sm mb-2">FLAG:</label>
                     <input
                       type="text"
                       value={newChallenge.flag}
                       onChange={(e) => setNewChallenge({ ...newChallenge, flag: e.target.value })}
-                      className="w-full px-4 py-2 glass rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      className="w-full terminal-input text-sm"
                       placeholder="CTF{example_flag}"
                     />
                   </div>
@@ -226,110 +232,110 @@ const AdminPage = () => {
                 <div className="flex justify-end gap-3 mt-4">
                   <button
                     onClick={() => setIsCreating(false)}
-                    className="px-4 py-2 glass text-white rounded-lg hover:bg-white/10 transition-colors"
+                    className="terminal-button px-3 py-1 text-sm"
                   >
-                    Cancel
+                    [CANCEL]
                   </button>
                   <button
                     onClick={handleCreateChallenge}
-                    className="px-4 py-2 bg-gradient-primary text-white rounded-lg hover:opacity-90 transition-opacity"
+                    className="terminal-button-primary px-3 py-1 text-sm"
                   >
-                    Create
+                    [CREATE]
                   </button>
                 </div>
               </div>
             )}
 
             {/* Challenges List */}
-            <div className="grid grid-cols-1 gap-4">
-              {challenges.map((challenge) => (
-                <div key={challenge.id} className="glass rounded-xl p-6 border-gradient card-hover">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <h4 className="text-xl font-bold text-white mb-2">{challenge.title}</h4>
-                      <p className="text-gray-400 mb-3">{challenge.description}</p>
-                      <div className="flex items-center gap-4 text-sm">
-                        <span className="text-purple-400">
-                          <span className="text-gray-500">Flag:</span> {challenge.flag}
-                        </span>
-                        <span className="text-cyan-400">
-                          <span className="text-gray-500">Points:</span> {challenge.points}
-                        </span>
+            <div className="space-y-4 mt-4">
+              {challenges.length === 0 ? (
+                <div className="terminal-card p-8 text-center">
+                  <div className="text-terminal-green-muted">No challenges found in database</div>
+                </div>
+              ) : (
+                challenges.map((challenge, index) => (
+                  <div key={challenge.id} className="terminal-card p-4 mb-4">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="text-terminal-green font-bold mb-2">
+                          CHALLENGE_{index + 1}: {challenge.title}
+                        </div>
+                        <div className="text-terminal-green-muted text-sm mb-3 pl-4">
+                          &gt; {challenge.description}
+                        </div>
+                        <div className="flex flex-wrap gap-4 text-xs">
+                          <span className="text-terminal-amber">
+                            FLAG: {challenge.flag}
+                          </span>
+                          <span className="text-terminal-cyan">
+                            POINTS: {challenge.points}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="ml-4 flex gap-2">
+                        <button className="terminal-button px-2 py-1 text-xs">
+                          [EDIT]
+                        </button>
+                        <button className="terminal-button px-2 py-1 text-xs hover:border-terminal-red hover:text-terminal-red">
+                          [DELETE]
+                        </button>
                       </div>
                     </div>
-                    <div className="ml-4 flex gap-2">
-                      <button className="p-2 glass rounded-lg hover:bg-white/10 transition-colors">
-                        ✏️
-                      </button>
-                      <button className="p-2 glass rounded-lg hover:bg-red-500/20 transition-colors">
-                        🗑️
-                      </button>
-                    </div>
                   </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </div>
         )}
 
         {/* Users Tab */}
         {activeTab === 'users' && (
-          <div className="glass rounded-2xl overflow-hidden">
+          <div className="terminal-card overflow-hidden">
+            <div className="p-4 border-b border-terminal-green/30">
+              <div className="text-terminal-green text-sm">
+                <span className="terminal-prompt">SELECT * FROM users;</span>
+              </div>
+            </div>
             <div className="overflow-x-auto">
-              <table className="w-full">
+              <table className="terminal-table w-full">
                 <thead>
-                  <tr className="border-b border-white/10">
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300 uppercase tracking-wider">
-                      User
-                    </th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300 uppercase tracking-wider">
-                      Email
-                    </th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300 uppercase tracking-wider">
-                      Role
-                    </th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300 uppercase tracking-wider">
-                      Joined
-                    </th>
-                    <th className="px-6 py-4 text-right text-sm font-semibold text-gray-300 uppercase tracking-wider">
-                      Actions
-                    </th>
+                  <tr className="text-terminal-green text-sm">
+                    <th className="text-left p-4 border-b border-terminal-green/30">USERNAME</th>
+                    <th className="text-left p-4 border-b border-terminal-green/30 hidden sm:table-cell">EMAIL</th>
+                    <th className="text-left p-4 border-b border-terminal-green/30">ROLE</th>
+                    <th className="text-left p-4 border-b border-terminal-green/30 hidden md:table-cell">JOINED</th>
+                    <th className="text-right p-4 border-b border-terminal-green/30">ACTIONS</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-white/5">
+                <tbody>
                   {users.map((user) => (
-                    <tr key={user.id} className="hover:bg-white/5 transition-colors">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <div className="w-10 h-10 rounded-full bg-gradient-primary flex items-center justify-center text-white font-bold mr-3">
-                            {user.name.charAt(0).toUpperCase()}
-                          </div>
-                          <div className="text-white font-medium">{user.name}</div>
-                        </div>
+                    <tr key={user.id} className="hover:bg-terminal-green/5 transition-colors">
+                      <td className="p-4 border-b border-terminal-green/10">
+                        <div className="text-terminal-green font-medium">{user.name}</div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-gray-400">
+                      <td className="p-4 border-b border-terminal-green/10 text-terminal-green-muted text-sm hidden sm:table-cell">
                         {user.email}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                      <td className="p-4 border-b border-terminal-green/10">
+                        <span className={`px-2 py-1 text-xs font-bold ${
                           user.role === 'ADMIN'
-                            ? 'bg-red-500/20 text-red-300'
-                            : 'bg-blue-500/20 text-blue-300'
+                            ? 'bg-terminal-red/20 text-terminal-red border border-terminal-red'
+                            : 'bg-terminal-green/20 text-terminal-green border border-terminal-green'
                         }`}>
-                          {user.role}
+                          [{user.role}]
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-gray-400">
+                      <td className="p-4 border-b border-terminal-green/10 text-terminal-green-muted text-sm hidden md:table-cell">
                         {new Date(user.createdAt).toLocaleDateString()}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right">
+                      <td className="p-4 border-b border-terminal-green/10 text-right">
                         <select
                           value={user.role}
                           onChange={(e) => handleUpdateUserRole(user.id, e.target.value)}
-                          className="px-3 py-1 glass rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                          className="terminal-input px-2 py-1 text-xs"
                         >
-                          <option value="USER">User</option>
-                          <option value="ADMIN">Admin</option>
+                          <option value="USER">USER</option>
+                          <option value="ADMIN">ADMIN</option>
                         </select>
                       </td>
                     </tr>
@@ -337,8 +343,21 @@ const AdminPage = () => {
                 </tbody>
               </table>
             </div>
+            <div className="p-4 border-t border-terminal-green/30 text-terminal-green-muted text-sm">
+              {users.length} user(s) found
+            </div>
           </div>
         )}
+
+        {/* Footer */}
+        <div className="mt-12 text-center text-terminal-green-muted text-xs">
+          <pre>
+{`================================================================================
+                    ADMIN ACCESS | HANDLE WITH CARE
+                         ALL ACTIONS ARE LOGGED
+================================================================================`}
+          </pre>
+        </div>
       </div>
     </div>
   );

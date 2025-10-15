@@ -9,11 +9,28 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        primary: '#0a0a0a',
-        secondary: '#1a1a1a',
-        accent: '#2a2a2a',
-        'text-primary': '#ffffff',
-        'text-secondary': '#a0a0a0',
+        'terminal': {
+          'green': '#00ff00',
+          'green-dark': '#00cc00',
+          'green-muted': '#008800',
+          'amber': '#ffaa00',
+          'red': '#ff0000',
+          'yellow': '#ffff00',
+          'cyan': '#00ffff',
+          'bg': '#000000',
+          'bg-alt': '#0a0a0a',
+        }
+      },
+      fontFamily: {
+        'mono': ['JetBrains Mono', 'Courier New', 'monospace'],
+      },
+      animation: {
+        'blink': 'blink 1s infinite',
+        'scanline': 'scanline 8s linear infinite',
+        'matrix-rain': 'matrix-rain 20s linear infinite',
+        'terminal-scan': 'terminal-scan 3s linear infinite',
+        'glitch': 'glitch 2s infinite',
+        'fadeIn': 'fadeIn 0.5s ease-in',
       },
     },
   },

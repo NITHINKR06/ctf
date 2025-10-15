@@ -18,12 +18,12 @@ const RegisterPage = () => {
     setError('');
 
     if (password !== confirmPassword) {
-      setError('Passwords do not match');
+      setError('ERROR: Password mismatch detected');
       return;
     }
 
     if (password.length < 6) {
-      setError('Password must be at least 6 characters');
+      setError('ERROR: Password must be >= 6 characters');
       return;
     }
 
@@ -43,163 +43,169 @@ const RegisterPage = () => {
       router.push('/login');
     } else {
       const data = await res.json();
-      setError(data.message || 'Something went wrong');
+      setError(`ERROR: ${data.message || 'Registration failed'}`);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center cyber-grid relative overflow-hidden">
-      {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-float"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-cyan-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-float" style={{ animationDelay: '2s' }}></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-pink-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-float" style={{ animationDelay: '4s' }}></div>
-      </div>
-
-      <div className="relative z-10 w-full max-w-md px-6">
-        {/* Logo/Title */}
-        <div className="text-center mb-8">
-          <h1 className="text-5xl font-bold mb-2">
-            <span className="text-gradient neon-text">CTF Platform</span>
-          </h1>
-          <p className="text-gray-400">Join the elite hackers!</p>
+    <div className="min-h-screen bg-black text-terminal-green font-mono flex items-center justify-center relative px-4">
+      {/* Matrix background effect */}
+      <div className="matrix-bg"></div>
+      
+      <div className="relative z-10 w-full max-w-md">
+        {/* ASCII Art Header */}
+        <div className="text-center mb-8 terminal-fade-in">
+          <pre className="text-terminal-green text-xs sm:text-sm inline-block">
+{`╔═══════════════════════════════╗
+║      USER REGISTRATION        ║
+╚═══════════════════════════════╝`}
+          </pre>
+          <div className="mt-4 text-terminal-green-muted text-sm">
+            <span className="terminal-cursor">Initialize new user profile</span>
+          </div>
         </div>
 
-        {/* Registration Form */}
-        <div className="glass rounded-2xl p-8 border-gradient pulse-glow">
-          <h2 className="text-2xl font-bold text-white mb-6 text-center">Create Account</h2>
+        {/* Registration Terminal */}
+        <div className="terminal-card p-6 sm:p-8">
+          <div className="mb-6">
+            <div className="text-terminal-green text-sm mb-2">
+              <span className="terminal-prompt">useradd --interactive</span>
+            </div>
+            <div className="text-terminal-green-muted text-xs">
+              Create your account to join the system
+            </div>
+          </div>
           
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-2">
-                Username
+              <label htmlFor="name" className="block text-terminal-green-muted text-sm mb-2">
+                USERNAME:
               </label>
               <div className="relative">
+                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-terminal-green">$</span>
                 <input
                   id="name"
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   required
-                  className="w-full px-4 py-3 glass rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
-                  placeholder="CyberNinja"
+                  className="terminal-input w-full pl-8"
+                  placeholder="hacker_name"
+                  autoComplete="username"
                 />
-                <div className="absolute inset-y-0 right-0 flex items-center pr-3">
-                  <span className="text-2xl">👤</span>
-                </div>
               </div>
             </div>
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
-                Email Address
+              <label htmlFor="email" className="block text-terminal-green-muted text-sm mb-2">
+                EMAIL_ADDRESS:
               </label>
               <div className="relative">
+                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-terminal-green">$</span>
                 <input
                   id="email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="w-full px-4 py-3 glass rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
-                  placeholder="hacker@example.com"
+                  className="terminal-input w-full pl-8"
+                  placeholder="user@system.net"
+                  autoComplete="email"
                 />
-                <div className="absolute inset-y-0 right-0 flex items-center pr-3">
-                  <span className="text-2xl">📧</span>
-                </div>
               </div>
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-2">
-                Password
+              <label htmlFor="password" className="block text-terminal-green-muted text-sm mb-2">
+                PASSWORD:
               </label>
               <div className="relative">
+                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-terminal-green">$</span>
                 <input
                   id="password"
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="w-full px-4 py-3 glass rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
+                  className="terminal-input w-full pl-8"
                   placeholder="••••••••"
+                  autoComplete="new-password"
                 />
-                <div className="absolute inset-y-0 right-0 flex items-center pr-3">
-                  <span className="text-2xl">🔒</span>
-                </div>
+              </div>
+              <div className="text-terminal-green-muted text-xs mt-1 pl-4">
+                MIN_LENGTH: 6 characters
               </div>
             </div>
 
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-300 mb-2">
-                Confirm Password
+              <label htmlFor="confirmPassword" className="block text-terminal-green-muted text-sm mb-2">
+                CONFIRM_PASSWORD:
               </label>
               <div className="relative">
+                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-terminal-green">$</span>
                 <input
                   id="confirmPassword"
                   type="password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required
-                  className="w-full px-4 py-3 glass rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
+                  className="terminal-input w-full pl-8"
                   placeholder="••••••••"
+                  autoComplete="new-password"
                 />
-                <div className="absolute inset-y-0 right-0 flex items-center pr-3">
-                  <span className="text-2xl">🔐</span>
-                </div>
               </div>
             </div>
 
             {error && (
-              <div className="glass border border-red-500/50 rounded-lg p-3">
-                <p className="text-red-400 text-sm flex items-center gap-2">
-                  <span>⚠️</span> {error}
+              <div className="terminal-border border-terminal-red p-3">
+                <p className="terminal-error text-sm flex items-center gap-2">
+                  <span>[!]</span> {error}
                 </p>
               </div>
             )}
 
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full py-3 bg-gradient-primary text-white rounded-lg font-semibold hover:opacity-90 transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isLoading ? (
-                <span className="flex items-center justify-center gap-2">
-                  <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                  </svg>
-                  Creating Account...
-                </span>
-              ) : (
-                'Create Account'
-              )}
-            </button>
+            <div className="pt-4">
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full terminal-button-primary py-2 text-sm font-bold tracking-wider"
+              >
+                {isLoading ? (
+                  <span className="terminal-loading">CREATING ACCOUNT</span>
+                ) : (
+                  '[CREATE_ACCOUNT]'
+                )}
+              </button>
+            </div>
           </form>
 
-          <div className="mt-6">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-600"></div>
+          <div className="mt-6 pt-6 border-t border-terminal-green/30">
+            <div className="text-center">
+              <div className="text-terminal-green-muted text-sm mb-2">
+                Already have an account?
               </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 glass text-gray-400">Already have an account?</span>
-              </div>
-            </div>
-
-            <div className="mt-6 text-center">
-              <Link href="/login" className="text-purple-400 hover:text-purple-300 font-medium transition-colors">
-                Sign in instead →
+              <Link href="/login" className="text-terminal-green hover:text-terminal-green-dark transition-colors text-sm font-bold">
+                &gt; LOGIN_TO_SYSTEM
               </Link>
             </div>
           </div>
         </div>
 
-        {/* Additional Links */}
+        {/* Footer */}
         <div className="mt-8 text-center">
-          <Link href="/" className="text-gray-400 hover:text-white transition-colors text-sm">
-            ← Back to Home
+          <Link href="/" className="text-terminal-green-muted hover:text-terminal-green transition-colors text-sm">
+            &lt; RETURN_TO_MAIN
           </Link>
+        </div>
+
+        {/* System Requirements */}
+        <div className="mt-8 text-center text-terminal-green-muted text-xs">
+          <pre>
+{`================================================================================
+                        SYSTEM REQUIREMENTS MET
+                    Storage: OK | Memory: OK | CPU: OK
+================================================================================`}
+          </pre>
         </div>
       </div>
     </div>
