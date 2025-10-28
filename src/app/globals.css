@@ -1,408 +1,181 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
-@layer base {
-  :root {
-    --terminal-green: #00ff00;
-    --terminal-green-dark: #00cc00;
-    --terminal-green-muted: #008800;
-    --terminal-amber: #ffaa00;
-    --terminal-red: #ff0000;
-    --terminal-yellow: #ffff00;
-    --terminal-cyan: #00ffff;
-    --terminal-bg: #000000;
-    --terminal-bg-alt: #0a0a0a;
-    --terminal-border: rgba(0, 255, 0, 0.3);
-  }
-
-  * {
-    box-sizing: border-box;
-  }
-
-  body {
-    font-family: 'JetBrains Mono', 'Courier New', monospace;
-    background: var(--terminal-bg);
-    color: var(--terminal-green);
-    min-height: 100vh;
-    overflow-x: hidden;
-    letter-spacing: 0.05em;
-  }
-
-  /* Terminal scanline effect */
-  body::before {
-    content: "";
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(
-      transparent 50%,
-      rgba(0, 255, 0, 0.03) 50%
-    );
-    background-size: 100% 4px;
-    pointer-events: none;
-    z-index: 1;
-    animation: scanline 8s linear infinite;
-  }
-
-  @keyframes scanline {
-    0% {
-      transform: translateY(0);
-    }
-    100% {
-      transform: translateY(10px);
-    }
-  }
-
-  /* Custom scrollbar */
-  ::-webkit-scrollbar {
-    width: 12px;
-    height: 12px;
-  }
-
-  ::-webkit-scrollbar-track {
-    background: var(--terminal-bg);
-    border: 1px solid var(--terminal-border);
-  }
-
-  ::-webkit-scrollbar-thumb {
-    background: var(--terminal-green-dark);
-    border: 1px solid var(--terminal-green);
-  }
-
-  ::-webkit-scrollbar-thumb:hover {
-    background: var(--terminal-green);
-  }
-
-  /* Selection color */
-  ::selection {
-    background: var(--terminal-green);
-    color: var(--terminal-bg);
-  }
+:root {
+  --background: 0 0% 100%;
+  --foreground: 222.2 84% 4.9%;
+  --card: 0 0% 100%;
+  --card-foreground: 222.2 84% 4.9%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 222.2 84% 4.9%;
+  --primary: 221.2 83.2% 53.3%;
+  --primary-foreground: 210 40% 98%;
+  --secondary: 210 40% 96%;
+  --secondary-foreground: 222.2 84% 4.9%;
+  --muted: 210 40% 96%;
+  --muted-foreground: 215.4 16.3% 46.9%;
+  --accent: 210 40% 96%;
+  --accent-foreground: 222.2 84% 4.9%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 214.3 31.8% 91.4%;
+  --input: 214.3 31.8% 91.4%;
+  --ring: 221.2 83.2% 53.3%;
+  --radius: 0.5rem;
 }
 
-@layer utilities {
-  /* Terminal text effects */
-  .terminal-text {
-    color: var(--terminal-green);
-    text-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
-  }
+.dark {
+  --background: 222.2 84% 4.9%;
+  --foreground: 210 40% 98%;
+  --card: 222.2 84% 4.9%;
+  --card-foreground: 210 40% 98%;
+  --popover: 222.2 84% 4.9%;
+  --popover-foreground: 210 40% 98%;
+  --primary: 217.2 91.2% 59.8%;
+  --primary-foreground: 222.2 84% 4.9%;
+  --secondary: 217.2 32.6% 17.5%;
+  --secondary-foreground: 210 40% 98%;
+  --muted: 217.2 32.6% 17.5%;
+  --muted-foreground: 215 20.2% 65.1%;
+  --accent: 217.2 32.6% 17.5%;
+  --accent-foreground: 210 40% 98%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 217.2 32.6% 17.5%;
+  --input: 217.2 32.6% 17.5%;
+  --ring: 224.3 76.3% 94.1%;
+}
 
-  .terminal-text-bright {
-    color: var(--terminal-green);
-    text-shadow: 0 0 10px rgba(0, 255, 0, 0.8);
-  }
+* {
+  border-color: hsl(var(--border));
+}
 
-  .terminal-text-muted {
-    color: var(--terminal-green-muted);
-    text-shadow: 0 0 3px rgba(0, 255, 0, 0.3);
-  }
+body {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-family: 'Inter', system-ui, sans-serif;
+  font-feature-settings: "rlig" 1, "calt" 1;
+}
 
-  /* Terminal borders */
-  .terminal-border {
-    border: 1px solid var(--terminal-border);
-    box-shadow: 
-      inset 0 0 10px rgba(0, 255, 0, 0.1),
-      0 0 10px rgba(0, 255, 0, 0.1);
-  }
+/* Custom component styles */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: colors 0.2s;
+  outline: none;
+  border: none;
+  cursor: pointer;
+}
 
-  .terminal-border-solid {
-    border: 2px solid var(--terminal-green);
-    box-shadow: 
-      inset 0 0 20px rgba(0, 255, 0, 0.2),
-      0 0 20px rgba(0, 255, 0, 0.2);
-  }
+.btn:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
 
-  /* Terminal card */
-  .terminal-card {
-    background: var(--terminal-bg-alt);
-    border: 1px solid var(--terminal-border);
-    box-shadow: 
-      inset 0 0 20px rgba(0, 255, 0, 0.05),
-      0 0 20px rgba(0, 255, 0, 0.05);
-    position: relative;
-    margin-bottom: 1rem;
-  }
+.btn:disabled {
+  pointer-events: none;
+  opacity: 0.5;
+}
 
-  .terminal-card::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: linear-gradient(90deg, 
-      transparent, 
-      var(--terminal-green), 
-      transparent
-    );
-    animation: terminal-scan 3s linear infinite;
-  }
+.btn-primary {
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+}
 
-  @keyframes terminal-scan {
-    0% {
-      transform: translateX(-100%);
-    }
-    100% {
-      transform: translateX(100%);
-    }
-  }
+.btn-primary:hover {
+  background-color: hsl(var(--primary) / 0.9);
+}
 
-  /* Terminal button */
-  .terminal-button {
-    background: var(--terminal-bg);
-    color: var(--terminal-green);
-    border: 1px solid var(--terminal-green);
-    padding: 0.5rem 1rem;
-    font-family: inherit;
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    cursor: pointer;
-    transition: all 0.2s;
-    position: relative;
-    overflow: hidden;
-    display: inline-block;
-  }
+.btn-secondary {
+  background-color: hsl(var(--secondary));
+  color: hsl(var(--secondary-foreground));
+}
 
-  .terminal-button:hover {
-    background: var(--terminal-green);
-    color: var(--terminal-bg);
-    box-shadow: 
-      0 0 20px rgba(0, 255, 0, 0.5),
-      inset 0 0 20px rgba(0, 0, 0, 0.2);
-  }
+.btn-secondary:hover {
+  background-color: hsl(var(--secondary) / 0.8);
+}
 
-  .terminal-button:active {
-    transform: scale(0.98);
-  }
+.btn-destructive {
+  background-color: hsl(var(--destructive));
+  color: hsl(var(--destructive-foreground));
+}
 
-  .terminal-button-primary {
-    background: var(--terminal-green-dark);
-    color: var(--terminal-bg);
-    border: 2px solid var(--terminal-green);
-  }
+.btn-destructive:hover {
+  background-color: hsl(var(--destructive) / 0.9);
+}
 
-  .terminal-button-primary:hover {
-    background: var(--terminal-green);
-    box-shadow: 
-      0 0 30px rgba(0, 255, 0, 0.7),
-      inset 0 0 20px rgba(0, 0, 0, 0.2);
-  }
+.btn-outline {
+  border: 1px solid hsl(var(--input));
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+}
 
-  /* Terminal input */
-  .terminal-input {
-    background: var(--terminal-bg);
-    color: var(--terminal-green);
-    border: 1px solid var(--terminal-border);
-    padding: 0.5rem 1rem;
-    font-family: inherit;
-    outline: none;
-    transition: all 0.2s;
-  }
+.btn-outline:hover {
+  background-color: hsl(var(--accent));
+  color: hsl(var(--accent-foreground));
+}
 
-  .terminal-input:focus {
-    border-color: var(--terminal-green);
-    box-shadow: 
-      0 0 10px rgba(0, 255, 0, 0.3),
-      inset 0 0 10px rgba(0, 255, 0, 0.1);
-  }
+.btn-ghost {
+  background-color: transparent;
+  color: hsl(var(--foreground));
+}
 
-  .terminal-input::placeholder {
-    color: var(--terminal-green-muted);
-    opacity: 0.5;
-  }
+.btn-ghost:hover {
+  background-color: hsl(var(--accent));
+  color: hsl(var(--accent-foreground));
+}
 
-  /* Typing cursor effect */
-  .terminal-cursor::after {
-    content: "_";
-    animation: blink 1s infinite;
-    color: var(--terminal-green);
-    font-weight: bold;
-  }
+.btn-sm {
+  height: 2.25rem;
+  padding: 0 0.75rem;
+}
 
-  @keyframes blink {
-    0%, 50% {
-      opacity: 1;
-    }
-    51%, 100% {
-      opacity: 0;
-    }
-  }
+.btn-lg {
+  height: 2.75rem;
+  padding: 0 2rem;
+}
 
-  /* Terminal prompt */
-  .terminal-prompt::before {
-    content: "> ";
-    color: var(--terminal-green);
-    font-weight: bold;
-  }
+.card {
+  border-radius: 0.5rem;
+  border: 1px solid hsl(var(--border));
+  background-color: hsl(var(--card));
+  color: hsl(var(--card-foreground));
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+}
 
-  /* Glitch effect */
-  .terminal-glitch {
-    position: relative;
-    animation: glitch 2s infinite;
-  }
+.input {
+  display: flex;
+  height: 2.5rem;
+  width: 100%;
+  border-radius: 0.375rem;
+  border: 1px solid hsl(var(--input));
+  background-color: hsl(var(--background));
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  outline: none;
+}
 
-  @keyframes glitch {
-    0%, 90%, 100% {
-      text-shadow: 
-        0 0 5px rgba(0, 255, 0, 0.5);
-    }
-    92% {
-      text-shadow: 
-        -2px 0 var(--terminal-red),
-        2px 0 var(--terminal-cyan);
-    }
-    94% {
-      text-shadow: 
-        2px 0 var(--terminal-red),
-        -2px 0 var(--terminal-cyan);
-    }
-    96% {
-      text-shadow: 
-        0 0 5px rgba(0, 255, 0, 0.5);
-    }
-  }
+.input:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
 
-  /* Matrix rain background */
-  .matrix-bg {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    opacity: 0.05;
-    z-index: 0;
-    overflow: hidden;
-  }
+.input:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
 
-  .matrix-bg::before {
-    content: "10101010 11001100 01010101 10011001 11110000 00001111 10101010 11001100";
-    position: absolute;
-    top: -100%;
-    left: 0;
-    width: 100%;
-    height: 200%;
-    color: var(--terminal-green);
-    font-size: 10px;
-    line-height: 10px;
-    word-break: break-all;
-    animation: matrix-rain 20s linear infinite;
-  }
+.input::placeholder {
+  color: hsl(var(--muted-foreground));
+}
 
-  @keyframes matrix-rain {
-    0% {
-      transform: translateY(0);
-    }
-    100% {
-      transform: translateY(50%);
-    }
-  }
-
-  /* ASCII box drawing */
-  .ascii-border {
-    border: none;
-    padding: 1rem;
-    position: relative;
-  }
-
-  .ascii-border::before {
-    content: "┌" "─" "┐";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    color: var(--terminal-green);
-  }
-
-  /* Terminal table */
-  .terminal-table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
-  }
-
-  .terminal-table th {
-    background: var(--terminal-bg-alt);
-    color: var(--terminal-green);
-    border: 1px solid var(--terminal-border);
-    padding: 0.75rem;
-    text-align: left;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-  }
-
-  .terminal-table td {
-    border: 1px solid var(--terminal-border);
-    padding: 0.75rem;
-    color: var(--terminal-green-muted);
-  }
-
-  .terminal-table tr:hover td {
-    background: rgba(0, 255, 0, 0.05);
-    color: var(--terminal-green);
-  }
-
-  /* Loading animation */
-  .terminal-loading {
-    display: inline-block;
-    position: relative;
-  }
-
-  .terminal-loading::after {
-    content: "...";
-    position: absolute;
-    left: 100%;
-    animation: loading 1.5s infinite;
-  }
-
-  @keyframes loading {
-    0% {
-      content: ".";
-    }
-    33% {
-      content: "..";
-    }
-    66% {
-      content: "...";
-    }
-  }
-
-  /* Success/Error states */
-  .terminal-success {
-    color: var(--terminal-green);
-    text-shadow: 0 0 10px rgba(0, 255, 0, 0.8);
-  }
-
-  .terminal-error {
-    color: var(--terminal-red);
-    text-shadow: 0 0 10px rgba(255, 0, 0, 0.8);
-  }
-
-  .terminal-warning {
-    color: var(--terminal-yellow);
-    text-shadow: 0 0 10px rgba(255, 255, 0, 0.8);
-  }
-
-  /* Fade in animation */
-  .terminal-fade-in {
-    animation: fadeIn 0.5s ease-in;
-  }
-
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
+.label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1;
 }

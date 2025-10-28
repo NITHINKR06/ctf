@@ -6,13 +6,13 @@ import Provider from '@/components/Provider';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'CTF Platform - Capture The Flag',
-  description: 'Test your hacking skills in our cybersecurity challenges',
+  title: 'CTF Dashboard - Capture The Flag Platform',
+  description: 'Test your cybersecurity skills with our CTF challenges',
   keywords: 'CTF, Capture The Flag, Cybersecurity, Hacking, Challenges',
   authors: [{ name: 'CTF Platform' }],
   openGraph: {
-    title: 'CTF Platform - Capture The Flag',
-    description: 'Test your hacking skills in our cybersecurity challenges',
+    title: 'CTF Dashboard - Capture The Flag Platform',
+    description: 'Test your cybersecurity skills with our CTF challenges',
     type: 'website',
   },
 };

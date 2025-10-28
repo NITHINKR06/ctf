@@ -1,117 +1,180 @@
 'use client';
 
-import { useSession } from 'next-auth/react';
+import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { collection, getDocs, doc, setDoc, getDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 interface Challenge {
   id: string;
   title: string;
   description: string;
   points: number;
-  createdAt: string;
-  updatedAt: string;
+  flag: string;
+  category: string;
+  createdAt: Date | string;
 }
 
-const HomePage = () => {
-  const { data: session } = useSession();
+interface UserScore {
+  userId: string;
+  userName: string;
+  totalScore: number;
+  solvedChallenges: string[];
+}
+
+export default function HomePage() {
+  const { user, logout } = useAuth();
   const router = useRouter();
   const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [flags, setFlags] = useState<{ [key: string]: string }>({});
   const [submissionStatus, setSubmissionStatus] = useState<{ [key: string]: string }>({});
   const [solvedChallenges, setSolvedChallenges] = useState<string[]>([]);
-  const [terminalInput, setTerminalInput] = useState('');
-  const [showWelcome, setShowWelcome] = useState(true);
+  const [userScore, setUserScore] = useState<UserScore | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchChallenges = async () => {
-      const res = await fetch('/api/challenges');
-      if (res.ok) {
-        const data = await res.json();
-        setChallenges(data);
+      if (!db) return;
+      
+      try {
+        const challengesRef = collection(db, 'challenges');
+        const snapshot = await getDocs(challengesRef);
+        const challengesData = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        })) as Challenge[];
+        setChallenges(challengesData);
+      } catch (err) {
+        console.error('Error fetching challenges:', err);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchChallenges();
-    
-    // Hide welcome message after 3 seconds
-    setTimeout(() => setShowWelcome(false), 3000);
   }, []);
 
+  useEffect(() => {
+    const fetchUserScore = async () => {
+      if (user && db) {
+        try {
+          const userScoreRef = doc(db, 'userScores', user.uid);
+          const userScoreSnap = await getDoc(userScoreRef);
+          
+          if (userScoreSnap.exists()) {
+            const scoreData = userScoreSnap.data() as UserScore;
+            setUserScore(scoreData);
+            setSolvedChallenges(scoreData.solvedChallenges || []);
+          } else {
+            // Create new user score document
+            const newUserScore: UserScore = {
+              userId: user.uid,
+              userName: user.displayName || user.email || 'Anonymous',
+              totalScore: 0,
+              solvedChallenges: []
+            };
+            await setDoc(userScoreRef, newUserScore);
+            setUserScore(newUserScore);
+          }
+        } catch (err) {
+          console.error('Error fetching user score:', err);
+        }
+      }
+    };
+
+    fetchUserScore();
+  }, [user]);
+
   const handleFlagSubmit = async (challengeId: string) => {
+    if (!user || !db) return;
+
     const flag = flags[challengeId];
     if (!flag) {
-      setSubmissionStatus({ ...submissionStatus, [challengeId]: '[ERROR] No flag provided' });
+      setSubmissionStatus({ ...submissionStatus, [challengeId]: 'Please enter a flag' });
       return;
     }
 
-    const res = await fetch('/api/submissions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ challengeId, flag }),
-    });
+    const challenge = challenges.find(c => c.id === challengeId);
+    if (!challenge) return;
 
-    if (res.ok) {
-      setSubmissionStatus({ ...submissionStatus, [challengeId]: '[SUCCESS] Flag accepted! +' + challenges.find(c => c.id === challengeId)?.points + ' points' });
-      setSolvedChallenges([...solvedChallenges, challengeId]);
-      setFlags({ ...flags, [challengeId]: '' });
-    } else {
-      setSubmissionStatus({ ...submissionStatus, [challengeId]: '[FAILED] Invalid flag. Access denied.' });
+    try {
+      if (flag.trim() === challenge.flag.trim()) {
+        // Correct flag
+        setSubmissionStatus({ ...submissionStatus, [challengeId]: `Correct! +${challenge.points} points` });
+        
+        // Update user score
+        const updatedSolvedChallenges = [...solvedChallenges, challengeId];
+        const newTotalScore = userScore ? userScore.totalScore + challenge.points : challenge.points;
+        
+        const updatedUserScore: UserScore = {
+          userId: user.uid,
+          userName: user.displayName || user.email || 'Anonymous',
+          totalScore: newTotalScore,
+          solvedChallenges: updatedSolvedChallenges
+        };
+
+        const userScoreRef = doc(db, 'userScores', user.uid);
+        await setDoc(userScoreRef, updatedUserScore);
+        
+        setUserScore(updatedUserScore);
+        setSolvedChallenges(updatedSolvedChallenges);
+        setFlags({ ...flags, [challengeId]: '' });
+      } else {
+        setSubmissionStatus({ ...submissionStatus, [challengeId]: 'Incorrect flag' });
+      }
+    } catch {
+      setSubmissionStatus({ ...submissionStatus, [challengeId]: 'Submission failed' });
     }
   };
 
+  const handleLogout = async () => {
+    try {
+      await logout();
+      router.push('/');
+    } catch (err) {
+      console.error('Logout failed:', err);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-black text-terminal-green font-mono relative">
-      {/* Matrix background effect */}
-      <div className="matrix-bg"></div>
-      
-      {/* Scanline effect is applied via CSS */}
-      
-      {/* Terminal Header */}
-      <nav className="relative z-10 border-b border-terminal-green/30 bg-terminal-bg-alt/80 backdrop-blur-sm">
+    <div className="min-h-screen bg-background">
+      {/* Navigation */}
+      <nav className="border-b bg-card">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <div className="flex items-center space-x-4">
-              <pre className="text-terminal-green text-sm hidden sm:block">
-{`╔═══════════════╗
-║ CTF TERMINAL  ║
-╚═══════════════╝`}
-              </pre>
-              <span className="text-terminal-green terminal-text-bright text-xl font-bold sm:hidden">
-                CTF_TERMINAL
-              </span>
+            <div className="flex items-center">
+              <h1 className="text-2xl font-bold text-primary">CTF Dashboard</h1>
             </div>
-            <div className="flex items-center space-x-4 text-sm">
-              {session ? (
+            <div className="flex items-center space-x-4">
+              {user ? (
                 <>
-                  <span className="terminal-text-muted hidden sm:inline">
-                    user@{session.user?.name?.toLowerCase().replace(/\s/g, '_')}
+                  <span className="text-sm text-muted-foreground">
+                    Welcome, {user.displayName || user.email}
                   </span>
-                  {session.user?.role === 'ADMIN' && (
-                    <Link href="/admin" className="terminal-button px-3 py-1">
-                      [ADMIN]
-                    </Link>
-                  )}
-                  <Link href="/leaderboard" className="terminal-button px-3 py-1">
-                    [SCORES]
+                  <Link href="/leaderboard" className="btn btn-outline btn-sm">
+                    Leaderboard
                   </Link>
-                  <button
-                    onClick={() => router.push('/api/auth/signout')}
-                    className="terminal-button px-3 py-1"
-                  >
-                    [LOGOUT]
+                  <button onClick={handleLogout} className="btn btn-outline btn-sm">
+                    Logout
                   </button>
                 </>
               ) : (
                 <>
-                  <Link href="/login" className="terminal-button px-3 py-1">
-                    [LOGIN]
+                  <Link href="/login" className="btn btn-outline btn-sm">
+                    Login
                   </Link>
-                  <Link href="/register" className="terminal-button-primary px-3 py-1">
-                    [REGISTER]
+                  <Link href="/register" className="btn btn-primary btn-sm">
+                    Register
                   </Link>
                 </>
               )}
@@ -121,163 +184,108 @@ const HomePage = () => {
       </nav>
 
       {/* Main Content */}
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Welcome Message */}
-        {showWelcome && (
-          <div className="mb-8 terminal-fade-in">
-            <pre className="text-terminal-green text-xs sm:text-sm overflow-x-auto">
-{`================================================================================
- ██████╗████████╗███████╗    ██████╗ ██╗      █████╗ ████████╗███████╗ ██████╗ ██████╗ ███╗   ███╗
-██╔════╝╚══██╔══╝██╔════╝    ██╔══██╗██║     ██╔══██╗╚══██╔══╝██╔════╝██╔═══██╗██╔══██╗████╗ ████║
-██║        ██║   █████╗      ██████╔╝██║     ███████║   ██║   █████╗  ██║   ██║██████╔╝██╔████╔██║
-██║        ██║   ██╔══╝      ██╔═══╝ ██║     ██╔══██║   ██║   ██╔══╝  ██║   ██║██╔══██╗██║╚██╔╝██║
-╚██████╗   ██║   ██║         ██║     ███████╗██║  ██║   ██║   ██║     ╚██████╔╝██║  ██║██║ ╚═╝ ██║
- ╚═════╝   ╚═╝   ╚═╝         ╚═╝     ╚══════╝╚═╝  ╚═╝   ╚═╝   ╚═╝      ╚═════╝ ╚═╝  ╚═╝╚═╝     ╚═╝
-================================================================================`}
-            </pre>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="card p-6">
+            <h3 className="text-lg font-semibold mb-2">Total Challenges</h3>
+            <p className="text-3xl font-bold text-primary">{challenges.length}</p>
           </div>
-        )}
-
-        {/* System Status */}
-        <div className="mb-6 terminal-card p-4">
-          <div className="text-terminal-green-muted text-sm mb-2">
-            <span className="terminal-prompt">system_status</span>
+          <div className="card p-6">
+            <h3 className="text-lg font-semibold mb-2">Solved</h3>
+            <p className="text-3xl font-bold text-green-600">{solvedChallenges.length}</p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
-            <div>
-              <span className="text-terminal-green-muted">CHALLENGES_LOADED: </span>
-              <span className="text-terminal-green terminal-text-bright">{challenges.length}</span>
-            </div>
-            <div>
-              <span className="text-terminal-green-muted">SOLVED_BY_USER: </span>
-              <span className="text-terminal-green terminal-text-bright">{solvedChallenges.length}</span>
-            </div>
-            <div>
-              <span className="text-terminal-green-muted">COMPLETION_RATE: </span>
-              <span className="text-terminal-green terminal-text-bright">
-                {challenges.length > 0 ? Math.round((solvedChallenges.length / challenges.length) * 100) : 0}%
-              </span>
-            </div>
+          <div className="card p-6">
+            <h3 className="text-lg font-semibold mb-2">Your Score</h3>
+            <p className="text-3xl font-bold text-primary">{userScore?.totalScore || 0}</p>
           </div>
         </div>
 
-        {/* Terminal Output */}
-        <div className="mb-6">
-          <div className="terminal-card p-4">
-            <div className="text-terminal-green-muted text-sm mb-4">
-              <span className="terminal-prompt">list_challenges --active</span>
+        {/* Challenges */}
+        <div className="space-y-6">
+          <h2 className="text-2xl font-bold">Challenges</h2>
+          
+          {!user ? (
+            <div className="card p-8 text-center">
+              <h3 className="text-xl font-semibold mb-4">Authentication Required</h3>
+              <p className="text-muted-foreground mb-6">Please login to access challenges</p>
+              <Link href="/login" className="btn btn-primary">
+                Login
+              </Link>
             </div>
-            
-            {!session ? (
-              <div className="text-center py-8">
-                <pre className="text-terminal-amber text-sm mb-4">
-{`╔════════════════════════════════════════╗
-║     AUTHENTICATION REQUIRED            ║
-║                                        ║
-║     Please login to access challenges  ║
-╚════════════════════════════════════════╝`}
-                </pre>
-                <Link href="/login" className="terminal-button-primary px-6 py-2 inline-block">
-                  [AUTHENTICATE]
-                </Link>
-              </div>
-            ) : challenges.length === 0 ? (
-              <div className="text-center py-8">
-                <pre className="text-terminal-green-muted text-sm">
-{`╔════════════════════════════════════════╗
-║     NO ACTIVE CHALLENGES               ║
-║                                        ║
-║     Waiting for new challenges...      ║
-╚════════════════════════════════════════╝`}
-                </pre>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {challenges.map((challenge, index) => {
-                  const isSolved = solvedChallenges.includes(challenge.id);
-                  return (
-                    <div
-                      key={challenge.id}
-                      className={`terminal-border p-4 mb-4 ${isSolved ? 'border-terminal-green' : ''} terminal-fade-in`}
-                      style={{ animationDelay: `${index * 0.1}s` }}
-                    >
-                      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-3">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            <span className="text-terminal-green-muted text-sm">CHALLENGE_{index + 1}:</span>
-                            <span className="text-terminal-green font-bold">
-                              {challenge.title}
+          ) : challenges.length === 0 ? (
+            <div className="card p-8 text-center">
+              <h3 className="text-xl font-semibold mb-4">No Challenges Available</h3>
+              <p className="text-muted-foreground">Check back later for new challenges</p>
+            </div>
+          ) : (
+            <div className="grid gap-6">
+              {challenges.map((challenge) => {
+                const isSolved = solvedChallenges.includes(challenge.id);
+                return (
+                  <div key={challenge.id} className="card p-6">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <h3 className="text-xl font-semibold">{challenge.title}</h3>
+                          {isSolved && (
+                            <span className="px-2 py-1 bg-green-100 text-green-800 text-sm font-medium rounded-full">
+                              Solved
                             </span>
-                            {isSolved && (
-                              <span className="text-terminal-green terminal-success text-sm">
-                                [SOLVED]
-                              </span>
-                            )}
-                          </div>
-                          <div className="text-terminal-green-muted text-sm mb-3 pl-4">
-                            &gt; {challenge.description}
-                          </div>
-                        </div>
-                        <div className="text-terminal-amber font-bold text-sm">
-                          [{challenge.points} PTS]
-                        </div>
-                      </div>
-                      
-                      {!isSolved && (
-                        <div className="space-y-2 mt-3">
-                          <div className="flex gap-2 items-center max-w-lg">
-                            <span className="text-terminal-green text-sm">$</span>
-                            <input
-                              type="text"
-                              placeholder="Enter flag..."
-                              value={flags[challenge.id] || ''}
-                              onChange={(e) => setFlags({ ...flags, [challenge.id]: e.target.value })}
-                              className="flex-1 terminal-input text-sm"
-                              onKeyPress={(e) => {
-                                if (e.key === 'Enter') {
-                                  handleFlagSubmit(challenge.id);
-                                }
-                              }}
-                            />
-                            <button
-                              onClick={() => handleFlagSubmit(challenge.id)}
-                              className="terminal-button px-4 py-1 text-sm whitespace-nowrap"
-                            >
-                              [SUBMIT]
-                            </button>
-                          </div>
-                          {submissionStatus[challenge.id] && (
-                            <div className={`text-sm pl-4 ${
-                              submissionStatus[challenge.id].includes('SUCCESS') 
-                                ? 'terminal-success' 
-                                : submissionStatus[challenge.id].includes('FAILED')
-                                ? 'terminal-error'
-                                : 'terminal-warning'
-                            }`}>
-                              {submissionStatus[challenge.id]}
-                            </div>
                           )}
                         </div>
-                      )}
+                        <p className="text-muted-foreground mb-2">{challenge.description}</p>
+                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                          <span>Category: {challenge.category}</span>
+                          <span>Points: {challenge.points}</span>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-2xl font-bold text-primary">{challenge.points}</div>
+                        <div className="text-sm text-muted-foreground">points</div>
+                      </div>
                     </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
+                    
+                    {!isSolved && (
+                      <div className="space-y-3">
+                        <div className="flex gap-3">
+                          <input
+                            type="text"
+                            placeholder="Enter flag..."
+                            value={flags[challenge.id] || ''}
+                            onChange={(e) => setFlags({ ...flags, [challenge.id]: e.target.value })}
+                            className="input flex-1"
+                            onKeyPress={(e) => {
+                              if (e.key === 'Enter') {
+                                handleFlagSubmit(challenge.id);
+                              }
+                            }}
+                          />
+                          <button
+                            onClick={() => handleFlagSubmit(challenge.id)}
+                            className="btn btn-primary"
+                          >
+                            Submit
+                          </button>
+                        </div>
+                        {submissionStatus[challenge.id] && (
+                          <div className={`text-sm ${
+                            submissionStatus[challenge.id].includes('Correct') 
+                              ? 'text-green-600' 
+                              : 'text-red-600'
+                          }`}>
+                            {submissionStatus[challenge.id]}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
-
-        {/* Footer Terminal */}
-        <div className="text-center text-terminal-green-muted text-xs">
-          <pre>
-{`================================================================================
-                    SYSTEM READY | TYPE 'HELP' FOR COMMANDS
-================================================================================`}
-          </pre>
-        </div>
-      </div>
+      </main>
     </div>
   );
-};
-
-export default HomePage;
+}
