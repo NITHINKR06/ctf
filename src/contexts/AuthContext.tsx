@@ -7,7 +7,9 @@ import {
   createUserWithEmailAndPassword, 
   signOut, 
   onAuthStateChanged,
-  updateProfile
+  updateProfile,
+  GoogleAuthProvider,
+  signInWithPopup
 } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 
@@ -16,6 +18,9 @@ interface AuthContextType {
   loading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string, name: string) => Promise<void>;
+  signInWithGoogle: () => Promise<void>;
+  login: (email: string, password: string) => Promise<void>;  // Alias for signIn
+  register: (email: string, password: string, name: string) => Promise<void>;  // Alias for signUp
   logout: () => Promise<void>;
 }
 
@@ -59,6 +64,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await updateProfile(userCredential.user, { displayName: name });
   };
 
+  const signInWithGoogle = async () => {
+    if (!auth) throw new Error('Firebase not initialized');
+    const provider = new GoogleAuthProvider();
+    try {
+      await signInWithPopup(auth, provider);
+    } catch (error: any) {
+      // Handle specific Google sign-in errors
+      if (error.code === 'auth/popup-closed-by-user') {
+        throw new Error('Sign-in cancelled');
+      }
+      throw error;
+    }
+  };
+
   const logout = async () => {
     if (!auth) throw new Error('Firebase not initialized');
     await signOut(auth);
@@ -69,6 +88,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     loading,
     signIn,
     signUp,
+    signInWithGoogle,
+    login: signIn,  // Provide alias for consistency with login page
+    register: signUp,  // Provide alias for consistency with register page
     logout,
   };
 

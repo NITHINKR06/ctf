@@ -219,69 +219,104 @@ export default function HomePage() {
               <p className="text-muted-foreground">Check back later for new challenges</p>
             </div>
           ) : (
-            <div className="grid gap-6">
-              {challenges.map((challenge) => {
-                const isSolved = solvedChallenges.includes(challenge.id);
-                return (
-                  <div key={challenge.id} className="card p-6">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <h3 className="text-xl font-semibold">{challenge.title}</h3>
-                          {isSolved && (
-                            <span className="px-2 py-1 bg-green-100 text-green-800 text-sm font-medium rounded-full">
-                              Solved
-                            </span>
-                          )}
-                        </div>
-                        <p className="text-muted-foreground mb-2">{challenge.description}</p>
-                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                          <span>Category: {challenge.category}</span>
-                          <span>Points: {challenge.points}</span>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-2xl font-bold text-primary">{challenge.points}</div>
-                        <div className="text-sm text-muted-foreground">points</div>
-                      </div>
-                    </div>
-                    
-                    {!isSolved && (
-                      <div className="space-y-3">
-                        <div className="flex gap-3">
-                          <input
-                            type="text"
-                            placeholder="Enter flag..."
-                            value={flags[challenge.id] || ''}
-                            onChange={(e) => setFlags({ ...flags, [challenge.id]: e.target.value })}
-                            className="input flex-1"
-                            onKeyPress={(e) => {
-                              if (e.key === 'Enter') {
-                                handleFlagSubmit(challenge.id);
-                              }
-                            }}
-                          />
-                          <button
-                            onClick={() => handleFlagSubmit(challenge.id)}
-                            className="btn btn-primary"
-                          >
-                            Submit
-                          </button>
-                        </div>
-                        {submissionStatus[challenge.id] && (
-                          <div className={`text-sm ${
-                            submissionStatus[challenge.id].includes('Correct') 
-                              ? 'text-green-600' 
-                              : 'text-red-600'
-                          }`}>
-                            {submissionStatus[challenge.id]}
+            <div className="space-y-8">
+              {/* Group challenges by category */}
+              {(() => {
+                // Define category order - difficulty levels first, then other categories
+                const categoryOrder = ['Easy', 'Medium', 'Medium-Hard', 'Hard'];
+                
+                // Group challenges by category
+                const challengesByCategory = challenges.reduce((acc, challenge) => {
+                  const category = challenge.category || 'Uncategorized';
+                  if (!acc[category]) {
+                    acc[category] = [];
+                  }
+                  acc[category].push(challenge);
+                  return acc;
+                }, {} as { [key: string]: Challenge[] });
+                
+                // Sort categories based on predefined order, then alphabetically for others
+                const sortedCategories = Object.keys(challengesByCategory).sort((a, b) => {
+                  const indexA = categoryOrder.indexOf(a);
+                  const indexB = categoryOrder.indexOf(b);
+                  
+                  if (indexA !== -1 && indexB !== -1) {
+                    return indexA - indexB;
+                  }
+                  if (indexA !== -1) return -1;
+                  if (indexB !== -1) return 1;
+                  return a.localeCompare(b);
+                });
+                
+                return sortedCategories.map((category) => (
+                  <div key={category} className="space-y-4">
+                    <h3 className="text-lg font-semibold text-muted-foreground">{category}</h3>
+                    <div className="grid gap-4">
+                      {challengesByCategory[category].map((challenge) => {
+                        const isSolved = solvedChallenges.includes(challenge.id);
+                        return (
+                          <div key={challenge.id} className="card p-6">
+                            <div className="flex items-start justify-between mb-4">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-3 mb-2">
+                                  <h3 className="text-xl font-semibold">{challenge.title}</h3>
+                                  {isSolved && (
+                                    <span className="px-2 py-1 bg-green-100 text-green-800 text-sm font-medium rounded-full">
+                                      Solved
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="text-muted-foreground mb-2">{challenge.description}</p>
+                                <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                                  <span>Points: {challenge.points}</span>
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <div className="text-2xl font-bold text-primary">{challenge.points}</div>
+                                <div className="text-sm text-muted-foreground">points</div>
+                              </div>
+                            </div>
+                            
+                            {!isSolved && (
+                              <div className="space-y-3">
+                                <div className="flex gap-3">
+                                  <input
+                                    type="text"
+                                    placeholder="Enter flag..."
+                                    value={flags[challenge.id] || ''}
+                                    onChange={(e) => setFlags({ ...flags, [challenge.id]: e.target.value })}
+                                    className="input flex-1"
+                                    onKeyPress={(e) => {
+                                      if (e.key === 'Enter') {
+                                        handleFlagSubmit(challenge.id);
+                                      }
+                                    }}
+                                  />
+                                  <button
+                                    onClick={() => handleFlagSubmit(challenge.id)}
+                                    className="btn btn-primary"
+                                  >
+                                    Submit
+                                  </button>
+                                </div>
+                                {submissionStatus[challenge.id] && (
+                                  <div className={`text-sm ${
+                                    submissionStatus[challenge.id].includes('Correct') 
+                                      ? 'text-green-600' 
+                                      : 'text-red-600'
+                                  }`}>
+                                    {submissionStatus[challenge.id]}
+                                  </div>
+                                )}
+                              </div>
+                            )}
                           </div>
-                        )}
-                      </div>
-                    )}
+                        );
+                      })}
+                    </div>
                   </div>
-                );
-              })}
+                ));
+              })()}
             </div>
           )}
         </div>

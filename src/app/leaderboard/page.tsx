@@ -26,7 +26,9 @@ export default function LeaderboardPage() {
         const userScoresRef = collection(db, 'userScores');
         const q = query(userScoresRef, orderBy('totalScore', 'desc'));
         const snapshot = await getDocs(q);
-        const scores = snapshot.docs.map(doc => doc.data() as UserScore);
+        const scores = snapshot.docs
+          .map(doc => doc.data() as UserScore)
+          .filter(player => player.totalScore > 0); // Only show users with score > 0
         setLeaderboard(scores);
       } catch (err) {
         console.error('Error fetching leaderboard:', err);
@@ -97,6 +99,9 @@ export default function LeaderboardPage() {
               <h3 className="text-xl font-semibold mb-4">No Scores Yet</h3>
               <p className="text-muted-foreground mb-6">
                 Be the first to solve a challenge and appear on the leaderboard!
+              </p>
+              <p className="text-sm text-muted-foreground mb-6">
+                Note: Only players with scores greater than 0 will be shown.
               </p>
               <Link href="/" className="btn btn-primary">
                 Start Playing

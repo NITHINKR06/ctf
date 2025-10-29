@@ -16,8 +16,10 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
 
-  // Simple admin check - in production, you'd want proper role-based access
-  const isAdmin = user?.email === 'admin@ctfproton.in' || user?.uid === 'admin';
+  // Admin check - fetches admin emails from environment variable
+  // NEXT_PUBLIC_ADMIN_EMAILS should be a comma-separated list of emails
+  const adminEmails = process.env.NEXT_PUBLIC_ADMIN_EMAILS?.split(',').map(email => email.trim()) || ['admin@ctf.local'];
+  const isAdmin = user?.email && adminEmails.includes(user.email);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -153,12 +155,20 @@ export default function AdminPage() {
                 className="input mt-1"
               >
                 <option value="">Select a category</option>
-                <option value="Web">Web</option>
-                <option value="Crypto">Cryptography</option>
-                <option value="Forensics">Forensics</option>
-                <option value="Reverse">Reverse Engineering</option>
-                <option value="Pwn">Binary Exploitation</option>
-                <option value="Misc">Miscellaneous</option>
+                <optgroup label="Difficulty Levels">
+                  <option value="Easy">Easy</option>
+                  <option value="Medium">Medium</option>
+                  <option value="Medium-Hard">Medium-Hard</option>
+                  <option value="Hard">Hard</option>
+                </optgroup>
+                <optgroup label="Challenge Types">
+                  <option value="Web">Web</option>
+                  <option value="Crypto">Cryptography</option>
+                  <option value="Forensics">Forensics</option>
+                  <option value="Reverse">Reverse Engineering</option>
+                  <option value="Pwn">Binary Exploitation</option>
+                  <option value="Misc">Miscellaneous</option>
+                </optgroup>
               </select>
             </div>
             
