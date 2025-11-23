@@ -11,7 +11,8 @@ import {
   GoogleAuthProvider,
   signInWithPopup
 } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+import { auth, db } from '@/lib/firebase';
+import { collection, setDoc, doc, getDoc } from 'firebase/firestore';
 
 interface AuthContextType {
   user: User | null;
@@ -62,13 +63,38 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     // Update the user's display name
     await updateProfile(userCredential.user, { displayName: name });
+    
+    // Save user data to Firestore
+    if (db && userCredential.user) {
+      await setDoc(doc(collection(db, 'users'), userCredential.user.uid), {
+        uid: userCredential.user.uid,
+        email: userCredential.user.email,
+        displayName: name,
+        createdAt: new Date()
+      });
+    }
   };
 
   const signInWithGoogle = async () => {
     if (!auth) throw new Error('Firebase not initialized');
     const provider = new GoogleAuthProvider();
     try {
-      await signInWithPopup(auth, provider);
+      const result = await signInWithPopup(auth, provider);
+      
+      // Save Google user data to Firestore if not already exists
+      if (db && result.user) {
+        const userRef = doc(collection(db, 'users'), result.user.uid);
+        const userSnap = await getDoc(userRef);
+        
+        if (!userSnap.exists()) {
+          await setDoc(userRef, {
+            uid: result.user.uid,
+            email: result.user.email,
+            displayName: result.user.displayName,
+            createdAt: new Date()
+          });
+        }
+      }
     } catch (error) {
       // Handle specific Google sign-in errors
       const firebaseError = error as { code?: string; message?: string };

@@ -11,6 +11,7 @@ interface UserScore {
   userName: string;
   totalScore: number;
   solvedChallenges: string[];
+  createdAt?: any; // Timestamp when user first got this score or registered
 }
 
 export default function LeaderboardPage() {
@@ -28,7 +29,18 @@ export default function LeaderboardPage() {
         const snapshot = await getDocs(q);
         const scores = snapshot.docs
           .map(doc => doc.data() as UserScore)
-          .filter(player => player.totalScore > 0); // Only show users with score > 0
+          .filter(player => player.totalScore > 0) // Only show users with score > 0
+          .sort((a, b) => {
+            // First sort by score (descending)
+            if (a.totalScore !== b.totalScore) {
+              return b.totalScore - a.totalScore;
+            }
+            
+            // If scores are equal, sort by createdAt (ascending - earlier first)
+            const timeA = a.createdAt?.toDate?.() || new Date(a.createdAt || 0);
+            const timeB = b.createdAt?.toDate?.() || new Date(b.createdAt || 0);
+            return timeA - timeB;
+          });
         setLeaderboard(scores);
       } catch (err) {
         console.error('Error fetching leaderboard:', err);
